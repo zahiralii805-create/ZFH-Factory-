@@ -1,79 +1,342 @@
-<!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZFH Factory — Working Demo</title>
-<style>
-:root{--bg:#0d1117;--panel:#171d27;--panel2:#202938;--line:#303b4b;--text:#f4f7fb;--muted:#aab5c5;--orange:#ff8a24;--green:#35c98a;--red:#ff6666}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:12px}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,sans-serif}header{padding:17px;display:flex;align-items:center;gap:12px;background:#171d27;border-bottom:1px solid var(--line)}.mark{width:52px;height:52px;border-radius:13px;background:var(--orange);color:#111;display:grid;place-items:center;font-weight:950;font-size:21px}.brand{font-size:20px;font-weight:900}.muted,.small,label{color:var(--muted)}.small,label{font-size:12px}.badge{display:inline-block;background:#382817;color:#ffc083;padding:4px 8px;border-radius:30px;font-size:11px;margin-top:4px}main{max-width:900px;margin:auto;padding:13px}.tabs{display:flex;gap:7px;overflow-x:auto;padding:4px 0 12px;position:sticky;top:0;background:var(--bg);z-index:5}.tabs a{flex:0 0 auto;text-decoration:none;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 12px}.tabs a:active,.tabs a:focus{background:var(--orange);color:#111}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card,.section{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px;margin:0 0 10px}.metric{font-size:25px;font-weight:850;margin-top:5px}.pane{margin-bottom:22px}.pane h2{font-size:19px;margin:10px 0}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}label{display:block;margin-bottom:5px}input,select,textarea{width:100%;padding:11px;background:#0e131b;border:1px solid var(--line);border-radius:9px;color:var(--text);font:inherit;min-height:42px}button,.button{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:9px;font:inherit;cursor:pointer}.primary{background:var(--orange);color:#111;border-color:var(--orange);font-weight:800}.wide{width:100%;margin-top:12px}.danger{border-color:#8d3434;color:#ffb4b4}.ok{color:var(--green)}.row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.row .actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.pill{display:inline-block;border-radius:30px;background:#2b3545;padding:4px 8px;font-size:11px;color:#dce5f2}.notice{background:#282117;border-left:3px solid var(--orange);padding:11px;border-radius:7px;color:#f8d5ad;font-size:12px;line-height:1.5;margin:10px 0}.empty{font-size:13px;color:var(--muted);padding:10px 0}.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}.summary>div{background:#10151d;border-radius:9px;padding:10px}.right{text-align:right}.hidden{display:none!important}footer{text-align:center;color:var(--muted);padding:20px;font-size:11px}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.inline input{flex:1;min-width:120px}@media(min-width:650px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style></head><body>
-<header><div class="mark">ZFH</div><div><div class="brand">ZFH FACTORY</div><div class="small">ZAHIR FASHION HUB · Factory Management</div><span class="badge" id="connectionBadge">FIREBASE SETUP VERSION</span></div></header>
-<section id="authPanel" style="max-width:560px;margin:18px auto;padding:16px;background:#171d27;border:1px solid #303b4b;border-radius:13px">
-<h2 style="margin-top:0">🔐 ZFH Admin Login</h2>
-<p class="small">Apne Firebase Authentication mein banaye gaye Admin email aur password se login karein. Worker login abhi is version mein shamil nahi hai.</p>
-<form id="loginForm"><label>Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="Admin email"><label style="margin-top:10px">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Firebase password"><button class="primary wide" type="submit">Login & Online Sync</button></form>
-<div id="authStatus" class="notice" aria-live="polite">Firebase se connect hone ka intezar karein…</div><button id="logoutBtn" class="wide hidden" type="button">Logout</button>
-</section>
-<main id="factoryApp" class="hidden">
-<nav class="tabs"><a href="#overview">Overview</a><a href="#workers">Workers</a><a href="#production">Production</a><a href="#rates">Rates</a><a href="#accounts">Accounts</a><a href="#expenses">Expenses</a><a href="#reports">Reports</a></nav>
-<div class="notice"><b>Online version — Stage 1:</b> Admin login aur cloud sync. Worker self-registration/worker-only screen is build mein abhi nahi hai. Firebase free plan ki usage limits lagu hoti hain.</div>
-<section id="overview" class="pane"><h2>Factory Overview</h2><div class="grid"><div class="card"><div class="small">Total Workers</div><div class="metric" id="mWorkers">0</div></div><div class="card"><div class="small">Aaj ki Production</div><div class="metric" id="mProduction">0</div><div class="small">pieces / pockets</div></div><div class="card"><div class="small">Approval Pending</div><div class="metric" id="mPending">0</div></div><div class="card"><div class="small">Approved Earning</div><div class="metric" id="mEarn">₹0</div></div></div><div class="section"><b>Recent production</b><div id="recent" class="empty">Abhi koi entry nahi.</div></div><div class="section"><b>Worker-wise outstanding</b><div id="balancesOverview" class="empty">Worker add karne ke baad balance dikhega.</div></div></section>
-<section id="workers" class="pane"><h2>👷 Worker Management</h2><div class="section"><input id="editWorkerId" type="hidden"><div class="formgrid"><div><label>Worker ka naam</label><input id="wName" placeholder="Naam"></div><div><label>Mobile number (demo)</label><input id="wMobile" inputmode="numeric" maxlength="10" placeholder="10 digit mobile"></div><div><label>Kaam / category (ek hi)</label><select id="wCat"><option>Cutting</option><option>Singer</option><option>Overlock + Flatlock + Kansai</option></select></div><div><label>Demo PIN (secure login nahi)</label><input id="wPin" inputmode="numeric" maxlength="6" placeholder="4–6 digit PIN"></div></div><button class="primary wide" id="saveWorker">+ Worker Add Karein</button><button class="wide hidden" id="cancelWorker">Edit cancel</button></div><div id="workerList" class="section"></div></section>
-<section id="production" class="pane"><h2>🧵 Daily Production</h2><div class="section"><div class="formgrid"><div><label>Worker</label><select id="pWorker"></select></div><div><label>Item (worker category ke mutabiq)</label><select id="pItem"></select></div><div><label>Quantity (Pocket Cutting mein individual pockets)</label><input id="pQty" type="number" min="1" step="1" placeholder="Quantity"></div><div><label>Date</label><input id="pDate" type="date"></div></div><button class="primary wide" id="saveProduction">Production Entry Add Karein</button></div><div class="section"><div class="inline"><label style="margin:0">Filter</label><select id="prodFilter"><option value="All">All status</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div><div id="productionList"></div></div></section>
-<section id="rates" class="pane"><h2>💰 Per Piece / Pocket Rates</h2><div class="section"><div class="formgrid"><div><label>Category</label><select id="rCat"><option>Cutting</option><option>Singer</option><option>Overlock + Flatlock + Kansai</option></select></div><div><label>Item</label><select id="rItem"></select></div><div><label>Rate (₹)</label><input id="rValue" type="number" min="0" step="0.01" placeholder="Rate per piece / pocket"></div></div><button class="primary wide" id="saveRate">Rate Save Karein</button></div><div id="rateList" class="section"></div></section>
-<section id="accounts" class="pane"><h2>📒 Accounts, Payment & Advance</h2><div class="section"><div class="formgrid"><div><label>Worker</label><select id="aWorker"></select></div><div><label>Entry type</label><select id="aType"><option>Payment Diya</option><option>Advance Diya</option></select></div><div><label>Amount (₹)</label><input id="aAmount" type="number" min="0.01" step="0.01" placeholder="Amount"></div><div><label>Note / mode</label><input id="aNote" placeholder="Cash / UPI / note"></div></div><button class="primary wide" id="saveAccount">Payment / Advance Record Karein</button></div><div class="section"><b>Worker balances</b><div id="accountBalances"></div></div><div class="section"><h3 style="margin-top:0">📅 Weekly Payment Summary</h3><div class="notice">Selected week mein approved production ki earning automatic calculate hogi. Weekly amount = us week ki approved earning; due balance alag se total hisaab se dikhega.</div><div class="formgrid"><div><label>Week start (Monday)</label><input id="weekStart" type="date"></div><div><label>Week end (Sunday)</label><input id="weekEnd" type="date"></div></div><button class="primary wide" id="calcWeek" type="button">Weekly Total Calculate Karein</button><div id="weeklySummary" style="margin-top:10px"></div></div><div class="section"><b>Payment history</b><div id="accountList"></div></div></section>
-<section id="expenses" class="pane"><h2>🧾 Factory Expenses</h2><div class="section"><div class="formgrid"><div><label>Date</label><input id="eDate" type="date"></div><div><label>Expense category</label><select id="eCat"><option>Bijli</option><option>Machine repair</option><option>Transport</option><option>Material</option><option>Tea / food</option><option>Other</option></select></div><div><label>Amount (₹)</label><input id="eAmount" type="number" min="0.01" step="0.01" placeholder="Amount"></div><div><label>Details</label><input id="eNote" placeholder="Expense details"></div></div><button class="primary wide" id="saveExpense">Expense Save Karein</button></div><div id="expenseList" class="section"></div></section>
-<section id="reports" class="pane"><h2>📊 Reports & Export</h2><div class="section"><div class="formgrid"><div><label>Month</label><input id="reportMonth" type="month"></div><div><label>Report</label><select id="reportType"><option value="production">Production entries</option><option value="accounts">Payments & advances</option><option value="expenses">Expenses</option><option value="workers">Workers list</option><option value="summary">Worker earning/balance summary</option></select></div></div><button class="primary wide" id="exportCsv">CSV Download Karein</button><div id="reportSummary" class="summary" style="margin-top:12px"></div></div></section>
-</main><footer>ZFH FACTORY · Firebase Admin Sync Stage 1</footer>
-<script>
-'use strict';
-const CATS={"Cutting":["Kattu","Lower Full Size","Lower Small Size","Chaddi","Pocket Cutting"],"Singer":["Kattu","Lower"],"Overlock + Flatlock + Kansai":["Kattu","Lower Full Size","Lower Small Size","Chaddi"]};
-const MEM={};function get(key,def){try{let s=localStorage.getItem('zfh4_'+key);return s===null?def:JSON.parse(s)}catch(e){return Object.prototype.hasOwnProperty.call(MEM,key)?MEM[key]:def}}function put(key,val){MEM[key]=val;try{localStorage.setItem('zfh4_'+key,JSON.stringify(val))}catch(e){}}let workers=get('workers',[]),production=get('production',[]),rates=get('rates',{}),accounts=get('accounts',[]),expenses=get('expenses',[]);const $=id=>document.getElementById(id);const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2});const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const today=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};$('pDate').value=today();$('eDate').value=today();$('reportMonth').value=today().slice(0,7);const weekMonday=()=>{let d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};const weekSunday=()=>{let d=new Date();d.setDate(d.getDate()+ (6-((d.getDay()+6)%7)));return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};$('weekStart').value=weekMonday();$('weekEnd').value=weekSunday();
-function itemFill(catId,itemId){let cat=catId==='pWorker'?(workers.find(w=>String(w.id)===$(catId).value)||{}).cat:$(catId).value;let arr=CATS[cat]||[];$(itemId).innerHTML=arr.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')||'<option value="">Is category mein item nahi</option>'}
-function workerFill(){let oldP=$('pWorker').value,oldA=$('aWorker').value;let opts=workers.map(w=>`<option value="${w.id}">${esc(w.name)} — ${esc(w.cat)}</option>`).join('')||'<option value="">Pehle worker add karein</option>';['pWorker','aWorker'].forEach(id=>$(id).innerHTML=opts);if(workers.some(w=>String(w.id)===oldP))$('pWorker').value=oldP;if(workers.some(w=>String(w.id)===oldA))$('aWorker').value=oldA;itemFill('pWorker','pItem')}
-function due(w){let earned=production.filter(p=>p.wid===w.id&&p.status==='Approved').reduce((s,p)=>s+(p.qty*(p.rateAtApproval??Number(rates[p.cat+'|'+p.item]||0))),0);let paid=accounts.filter(a=>a.wid===w.id&&a.type==='Payment Diya').reduce((s,a)=>s+a.amount,0);let advance=accounts.filter(a=>a.wid===w.id&&a.type==='Advance Diya').reduce((s,a)=>s+a.amount,0);return {earned,paid,advance,balance:earned-paid-advance}}
-function persist(){put('workers',workers);put('production',production);put('rates',rates);put('accounts',accounts);put('expenses',expenses);render();if(window.zfhCloudSave)window.zfhCloudSave()}
-$('wCat').onchange=()=>{};$('pWorker').onchange=()=>itemFill('pWorker','pItem');$('rCat').onchange=()=>itemFill('rCat','rItem');$('prodFilter').onchange=render;
-$('saveWorker').onclick=()=>{let id=$('editWorkerId').value,name=$('wName').value.trim(),mobile=$('wMobile').value.trim(),cat=$('wCat').value,pin=$('wPin').value.trim();if(!name||!/^[0-9]{10}$/.test(mobile))return alert('Naam aur 10 digit mobile number bharein.');if(!id&&!/^[0-9]{4,6}$/.test(pin))return alert('Demo PIN 4–6 digit ka hona chahiye.');if(workers.some(w=>w.mobile===mobile&&String(w.id)!==id))return alert('Ye mobile number pehle se maujood hai.');if(id){let w=workers.find(w=>String(w.id)===id);if(w)Object.assign(w,{name,mobile,cat,...(pin?{pin}:{})});}else workers.push({id:Date.now(),name,mobile,cat,pin});clearWorkerForm();persist();alert(id?'Worker details update ho gayi.':'Worker add ho gaya.');};
-function clearWorkerForm(){$('editWorkerId').value='';$('wName').value='';$('wMobile').value='';$('wPin').value='';$('saveWorker').textContent='+ Worker Add Karein';$('cancelWorker').classList.add('hidden')}$('cancelWorker').onclick=clearWorkerForm;
-function editWorker(id){let w=workers.find(x=>x.id===Number(id));if(!w)return;$('editWorkerId').value=w.id;$('wName').value=w.name;$('wMobile').value=w.mobile;$('wCat').value=w.cat;$('wPin').value='';$('saveWorker').textContent='Changes Save Karein';$('cancelWorker').classList.remove('hidden');location.hash='#workers'}function deleteWorker(id){let w=workers.find(x=>x.id===Number(id));if(!w)return;if(production.some(p=>p.wid===w.id)||accounts.some(a=>a.wid===w.id))return alert('Is worker ki production/payment history hai, isliye delete nahi kar sakte. Zarurat ho to record preserve karein.');if(confirm(w.name+' ko delete karein?')){workers=workers.filter(x=>x.id!==w.id);persist()}}
-$('saveProduction').onclick=()=>{let w=workers.find(x=>x.id===Number($('pWorker').value)),item=$('pItem').value,qty=Number($('pQty').value),date=$('pDate').value;if(!w)return alert('Pehle worker add karein.');if(!item||!Number.isInteger(qty)||qty<1||!date)return alert('Item, poori quantity aur date check karein.');production.unshift({id:Date.now(),wid:w.id,name:w.name,cat:w.cat,item,qty,date,status:'Pending',rateAtApproval:null});$('pQty').value='';persist();alert('Production entry add ho gayi. Earning mein tab count hogi jab approve hogi.')};
-function decide(id,status){let p=production.find(x=>x.id===Number(id));if(!p||p.status!=='Pending')return;if(status==='Approved'){p.rateAtApproval=Number(rates[p.cat+'|'+p.item]||0);if(!Object.prototype.hasOwnProperty.call(rates,p.cat+'|'+p.item))if(!confirm('Is item ka rate set nahi hai. ₹0 rate par approve karna hai?'))return;}p.status=status;persist()}
-$('saveRate').onclick=()=>{let cat=$('rCat').value,item=$('rItem').value,raw=$('rValue').value;if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0)return alert('Valid rate (0 ya usse zyada) enter karein.');rates[cat+'|'+item]=Number(raw);$('rValue').value='';persist();alert('Rate save ho gaya. Approved entries ka purana rate nahi badlega.')};
-$('saveAccount').onclick=()=>{let w=workers.find(x=>x.id===Number($('aWorker').value)),amount=Number($('aAmount').value),type=$('aType').value,note=$('aNote').value.trim();if(!w)return alert('Pehle worker add karein.');if(!Number.isFinite(amount)||amount<=0)return alert('Amount 0 se zyada enter karein.');accounts.unshift({id:Date.now(),wid:w.id,name:w.name,type,amount,note,date:today()});$('aAmount').value='';$('aNote').value='';persist();alert('Account entry save ho gayi.')};
-$('saveExpense').onclick=()=>{let date=$('eDate').value,cat=$('eCat').value,amount=Number($('eAmount').value),note=$('eNote').value.trim();if(!date||!Number.isFinite(amount)||amount<=0)return alert('Date aur valid amount enter karein.');expenses.unshift({id:Date.now(),date,cat,amount,note});$('eAmount').value='';$('eNote').value='';persist();alert('Expense save ho gaya.')};
-function delRecord(type,id){if(!confirm('Is record ko delete karna hai?'))return;if(type==='prod')production=production.filter(x=>x.id!==Number(id));if(type==='account')accounts=accounts.filter(x=>x.id!==Number(id));if(type==='expense')expenses=expenses.filter(x=>x.id!==Number(id));persist()}
-function renderWeekly(){let start=$('weekStart').value,end=$('weekEnd').value;if(!start||!end||start>end){$('weeklySummary').innerHTML='<div class="empty">Week start aur end date sahi select karein.</div>';return}let rows=workers.map(w=>{let earned=production.filter(p=>p.wid===w.id&&p.status==='Approved'&&p.date>=start&&p.date<=end).reduce((s,p)=>s+p.qty*Number(p.rateAtApproval??rates[p.cat+'|'+p.item]??0),0);let paid=accounts.filter(a=>a.wid===w.id&&a.type==='Payment Diya'&&a.date>=start&&a.date<=end).reduce((s,a)=>s+a.amount,0);let d=due(w);return {w,earned,paid,due:d.balance}});$('weeklySummary').innerHTML=rows.map(r=>`<div class="row"><div><b>${esc(r.w.name)}</b><div class="small">${esc(r.w.cat)} · Is week payment diya: ${money(r.paid)} · Overall baaki: ${money(r.due)}</div></div><div class="right"><b>${money(r.earned)}</b><div class="small">Weekly earning</div></div></div>`).join('')||'<div class="empty">Pehle worker add karein.</div>';let total=rows.reduce((s,r)=>s+r.earned,0);$('weeklySummary').insertAdjacentHTML('beforeend',`<div class="summary"><div><div class="small">Total weekly earning</div><div class="metric">${money(total)}</div></div><div><div class="small">Selected period</div><b>${esc(start)} to ${esc(end)}</b></div></div>`)}$('calcWeek').onclick=renderWeekly;$('weekStart').onchange=renderWeekly;$('weekEnd').onchange=renderWeekly;
-function render(){workerFill();$('mWorkers').textContent=workers.length;$('mProduction').textContent=production.filter(p=>p.date===today()&&p.status!=='Rejected').reduce((s,p)=>s+p.qty,0);$('mPending').textContent=production.filter(p=>p.status==='Pending').length;$('mEarn').textContent=money(production.filter(p=>p.status==='Approved').reduce((s,p)=>s+p.qty*(p.rateAtApproval??0),0));$('workerList').innerHTML=workers.map(w=>`<div class="row"><div><b>${esc(w.name)}</b><div class="small">${esc(w.mobile)} · ${esc(w.cat)}</div><div class="small">Earning ${money(due(w).earned)} · Balance ${money(due(w).balance)}</div></div><div class="actions"><button onclick="editWorker(${w.id})">Edit</button><button class="danger" onclick="deleteWorker(${w.id})">Delete</button></div></div>`).join('')||'<div class="empty">Abhi worker add nahi hua.</div>';
-let pf=$('prodFilter').value,shown=production.filter(p=>pf==='All'||p.status===pf);$('productionList').innerHTML=shown.map(p=>`<div class="row"><div><b>${esc(p.name)} · ${esc(p.item)}</b><div class="small">${esc(p.cat)} · ${esc(p.date)} · Qty ${p.qty} · Rate ${p.rateAtApproval===null?'pending':money(p.rateAtApproval)} · Total ${p.status==='Approved'?money(p.qty*(p.rateAtApproval||0)):'—'}</div><span class="pill">${p.status}</span></div><div class="actions">${p.status==='Pending'?`<button onclick="decide(${p.id}, 'Approved')">Approve</button><button onclick="decide(${p.id}, 'Rejected')">Reject</button>`:''}<button class="danger" onclick="delRecord('prod',${p.id})">Delete</button></div></div>`).join('')||'<div class="empty">Is filter mein entry nahi hai.</div>';
-$('recent').innerHTML=production.slice(0,4).map(p=>`<div class="row"><span>${esc(p.name)} · ${esc(p.item)} (${p.qty})</span><span class="pill">${p.status}</span></div>`).join('')||'<div class="empty">Abhi koi entry nahi.</div>';
-$('rateList').innerHTML=Object.entries(rates).map(([k,v])=>`<div class="row"><span>${esc(k.replace('|',' · '))}</span><b>${money(v)} / ${k.endsWith('|Pocket Cutting')?'pocket':'piece'}</b></div>`).join('')||'<div class="empty">Rates abhi set nahi hain.</div>';
-const balHtml=workers.map(w=>{let d=due(w);return `<div class="row"><div><b>${esc(w.name)}</b><div class="small">Earned ${money(d.earned)} · Paid ${money(d.paid)} · Advance ${money(d.advance)}</div></div><b>${money(d.balance)}</b></div>`}).join('')||'<div class="empty">Abhi worker nahi hai.</div>';$('accountBalances').innerHTML=balHtml;$('balancesOverview').innerHTML=balHtml;
-$('accountList').innerHTML=accounts.map(a=>`<div class="row"><div><b>${esc(a.name)} · ${esc(a.type)}</b><div class="small">${esc(a.date)} · ${esc(a.note||'No note')}</div></div><div class="actions"><b>${money(a.amount)}</b><button class="danger" onclick="delRecord('account',${a.id})">Delete</button></div></div>`).join('')||'<div class="empty">Payment / advance record nahi hai.</div>';
-$('expenseList').innerHTML=expenses.map(e=>`<div class="row"><div><b>${esc(e.cat)} · ${money(e.amount)}</b><div class="small">${esc(e.date)} · ${esc(e.note||'No details')}</div></div><button class="danger" onclick="delRecord('expense',${e.id})">Delete</button></div>`).join('')||'<div class="empty">Expense record nahi hai.</div>';
-let month=$('reportMonth').value;let em=expenses.filter(e=>e.date.startsWith(month)).reduce((s,e)=>s+e.amount,0),pm=production.filter(p=>p.date.startsWith(month)&&p.status==='Approved').reduce((s,p)=>s+p.qty*(p.rateAtApproval||0),0);$('reportSummary').innerHTML=`<div><div class="small">${esc(month)} approved earning</div><b>${money(pm)}</b></div><div><div class="small">${esc(month)} expenses</div><b>${money(em)}</b></div>`;renderWeekly()}
-function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}$('exportCsv').onclick=()=>{let month=$('reportMonth').value,type=$('reportType').value,rows=[],filename='zfh-'+type+'-'+month+'.csv';if(type==='production'){rows=[['Date','Worker','Category','Item','Quantity','Status','Rate at approval','Amount'],...production.filter(p=>p.date.startsWith(month)).map(p=>[p.date,p.name,p.cat,p.item,p.qty,p.status,p.rateAtApproval??'',p.status==='Approved'?p.qty*(p.rateAtApproval||0):''])]}else if(type==='accounts'){rows=[['Date','Worker','Type','Amount','Note'],...accounts.filter(a=>a.date.startsWith(month)).map(a=>[a.date,a.name,a.type,a.amount,a.note])]}else if(type==='expenses'){rows=[['Date','Category','Amount','Details'],...expenses.filter(e=>e.date.startsWith(month)).map(e=>[e.date,e.cat,e.amount,e.note])]}else if(type==='workers'){rows=[['Name','Mobile','Category'],...workers.map(w=>[w.name,w.mobile,w.cat])]}else{rows=[['Worker','Category','Approved earning','Payments','Advances','Balance'],...workers.map(w=>{let d=due(w);return [w.name,w.cat,d.earned,d.paid,d.advance,d.balance]})]}let csv='\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)};
-itemFill('rCat','rItem');workerFill();render();
-</script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyBj_HoFFQJwmX6ChAp9YiuMOpUduZD0Yzc",
-  authDomain: "zfh-factory.firebaseapp.com",
-  projectId: "zfh-factory",
-  storageBucket: "zfh-factory.firebasestorage.app",
-  messagingSenderId: "508283993899",
-  appId: "1:508283993899:web:b030406d244cc118a50f6e",
-  measurementId: "G-21KK6BV0PD"
-};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-const $=id=>document.getElementById(id);let activeUid=null,unsubscribe=null,cloudReady=false,saveTimer=null,applyingCloud=false;
-function status(msg,good=false){$('authStatus').textContent=msg;$('authStatus').style.borderLeftColor=good?'#35c98a':'#ff8a24'}
-function showApp(on){$('factoryApp').classList.toggle('hidden',!on);$('logoutBtn').classList.toggle('hidden',!on);$('loginForm').classList.toggle('hidden',on);$('connectionBadge').textContent=on?'ONLINE SYNC ENABLED':'FIREBASE LOGIN REQUIRED'}
-function dataNow(){return {workers,production,rates,accounts,expenses}}
-function applyData(d){applyingCloud=true;workers=Array.isArray(d.workers)?d.workers:[];production=Array.isArray(d.production)?d.production:[];rates=d.rates&&typeof d.rates==='object'?d.rates:{};accounts=Array.isArray(d.accounts)?d.accounts:[];expenses=Array.isArray(d.expenses)?d.expenses:[];for(const [k,v] of Object.entries(dataNow())){try{localStorage.setItem('zfh4_'+k,JSON.stringify(v))}catch(e){}}render();applyingCloud=false}
-async function verifyAdmin(user){const ref=doc(db,'admins',user.uid);const snap=await getDoc(ref);return snap.exists()&&snap.data().role==='admin'}
-function beginSync(user){activeUid=user.uid;const ref=doc(db,'adminData',user.uid);cloudReady=false;if(unsubscribe)unsubscribe();unsubscribe=onSnapshot(ref,async snap=>{if(!snap.exists()){const local=dataNow();const hasLocal=local.workers.length||local.production.length||Object.keys(local.rates).length||local.accounts.length||local.expenses.length;if(hasLocal){await setDoc(ref,{...local,updatedAt:serverTimestamp()});}else{await setDoc(ref,{...local,updatedAt:serverTimestamp()});}cloudReady=true;status('Login safal. Is admin account ka cloud sync active hai.',true);return;}applyData(snap.data());cloudReady=true;status('Login safal — data Firebase par sync ho raha hai.',true)},err=>{cloudReady=false;status('Cloud sync error: '+err.message+' | Firestore Rules check karein.');});window.zfhCloudSave=()=>{if(!activeUid||!cloudReady||applyingCloud)return;clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await setDoc(ref,{...dataNow(),updatedAt:serverTimestamp()})}catch(e){status('Save error: '+e.message)}} ,700)};}
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password)return;status('Login check ho raha hai…');try{const cred=await signInWithEmailAndPassword(auth,email,password);if(!(await verifyAdmin(cred.user))){await signOut(auth);showApp(false);status('Is account ko Admin permission nahi mili. admins collection mein isi UID ka role=admin check karein.');return}showApp(true);status('Admin verify ho gaya. Cloud data load ho raha hai…',true);beginSync(cred.user)}catch(err){showApp(false);status('Login nahi hua: '+err.message)}});
-$('logoutBtn').addEventListener('click',async()=>{if(unsubscribe)unsubscribe();unsubscribe=null;activeUid=null;cloudReady=false;window.zfhCloudSave=null;await signOut(auth);showApp(false);status('Logout ho gaya.');});
-onAuthStateChanged(auth,async user=>{if(!user){showApp(false);status('Admin email/password se login karein.');return}try{if(await verifyAdmin(user)){showApp(true);beginSync(user)}else{await signOut(auth);showApp(false);status('Account Admin nahi hai. Admin UID/role check karein.')}}catch(e){showApp(false);status('Firebase setup error: '+e.message)}});
-</script>
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZFH Factory — Admin Diagnostic Tool</title>
+    <!-- Tailwind CSS for modern dark dashboard styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-orange-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50 px-4 py-3.5">
+        <div class="max-w-xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-wide text-white">ZFH Factory</h1>
+                    <p class="text-xs text-orange-400 font-medium">Admin Diagnostic & Permission Checker</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                    v2.0 Diagnostic
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-xl w-full mx-auto p-4 sm:p-6 flex-grow space-y-6">
+
+        <!-- Info Card -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur">
+            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Target Configuration
+            </h2>
+            <div class="text-xs space-y-1.5 text-slate-400">
+                <p><span class="text-slate-500 font-mono">Expected Admin UID:</span> <code class="text-orange-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded select-all">cHookFowc4d5XRL723TkT02edmO2</code></p>
+                <p><span class="text-slate-500 font-mono">Firestore Path:</span> <code class="text-slate-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded">admins/{uid}</code> (Field: <code class="text-slate-300 font-mono">role</code> == <code class="text-emerald-400 font-mono">"admin"</code>)</p>
+            </div>
+        </div>
+
+        <!-- Login Form Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500"></div>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Admin Email</label>
+                    <input type="email" id="emailInput" required placeholder="admin@example.com"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Admin Password</label>
+                    <input type="password" id="passwordInput" required placeholder="••••••••••••"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition">
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 active:scale-[0.99] text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-orange-600/20 transition flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btnText">Login karke Admin check karein</span>
+                    <span id="btnSpinner" class="hidden">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Diagnostic Results Container -->
+        <div id="resultsContainer" class="hidden space-y-4">
+            
+            <!-- Overall Status Banner -->
+            <div id="statusBanner" class="p-4 rounded-xl border flex items-start space-x-3 transition-all">
+                <div id="statusIcon" class="mt-0.5 shrink-0"></div>
+                <div class="flex-grow">
+                    <h3 id="statusTitle" class="font-semibold text-sm"></h3>
+                    <p id="statusDesc" class="text-xs mt-0.5 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Detailed Diagnostics Breakdown -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Diagnostic Details</span>
+                    <span class="text-[10px] text-slate-500">Live Execution Log</span>
+                </h3>
+
+                <div class="divide-y divide-slate-800/80 text-xs">
+                    <!-- Auth Check -->
+                    <div class="py-3 flex justify-between items-center">
+                        <span class="text-slate-400">Authentication State</span>
+                        <span id="diagAuth" class="font-mono text-slate-500">Pending</span>
+                    </div>
+                    <!-- UID Check -->
+                    <div class="py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                        <span class="text-slate-400">Authenticated UID</span>
+                        <span id="diagUid" class="font-mono text-slate-300 break-all sm:text-right">Not logged in</span>
+                    </div>
+                    <!-- Firestore Doc Check -->
+                    <div class="py-3 flex justify-between items-center">
+                        <span class="text-slate-400">Firestore Document (<code class="text-slate-300">admins/{uid}</code>)</span>
+                        <span id="diagDocExists" class="font-mono text-slate-500">Pending</span>
+                    </div>
+                    <!-- Role Field Check -->
+                    <div class="py-3 flex justify-between items-center">
+                        <span class="text-slate-400">Role Field Value</span>
+                        <span id="diagRoleValue" class="font-mono text-slate-500">Pending</span>
+                    </div>
+                    <!-- Role Type Check -->
+                    <div class="py-3 flex justify-between items-center">
+                        <span class="text-slate-400">Role Data Type</span>
+                        <span id="diagRoleType" class="font-mono text-slate-500">Pending</span>
+                    </div>
+                </div>
+
+                <!-- Raw Error Box (Hidden by default) -->
+                <div id="errorBox" class="hidden mt-3 p-3.5 bg-red-950/40 border border-red-900/50 rounded-xl">
+                    <p class="text-xs font-semibold text-red-400 mb-1 flex items-center">
+                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Firebase Error Report
+                    </p>
+                    <p id="errorText" class="text-xs font-mono text-red-300 break-all"></p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 py-4 px-4 text-center text-xs text-slate-600">
+        ZFH Factory Project &bull; Admin Diagnostic Utility
+    </footer>
+
+    <!-- Firebase SDK Integration (Modular ES Modules) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        // Provided Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBj_HoFFQJwmX6ChAp9YiuMOpUduZD0Yzc",
+            authDomain: "zfh-factory.firebaseapp.com",
+            projectId: "zfh-factory",
+            storageBucket: "zfh-factory.firebasestorage.app",
+            messagingSenderId: "508283993899",
+            appId: "1:508283993899:web:b030406d244cc118a50f6e",
+            measurementId: "G-21KK6BV0PD"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (initErr) {
+            console.error("Firebase SDK Initialization Error:", initErr);
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
+        const resultsContainer = document.getElementById('resultsContainer');
+        const statusBanner = document.getElementById('statusBanner');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusDesc = document.getElementById('statusDesc');
+
+        const diagAuth = document.getElementById('diagAuth');
+        const diagUid = document.getElementById('diagUid');
+        const diagDocExists = document.getElementById('diagDocExists');
+        const diagRoleValue = document.getElementById('diagRoleValue');
+        const diagRoleType = document.getElementById('diagRoleType');
+        const errorBox = document.getElementById('errorBox');
+        const errorText = document.getElementById('errorText');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!auth || !db) {
+                alert("Firebase failed to initialize. Please check network connection.");
+                return;
+            }
+
+            // UI Loading state
+            submitBtn.disabled = true;
+            btnText.textContent = "Authenticating...";
+            btnSpinner.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            errorBox.classList.add('hidden');
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            try {
+                // Step 5: Sign in using Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                diagAuth.textContent = "Authenticated Successfully";
+                diagAuth.className = "font-mono text-emerald-400 font-medium";
+
+                // Step 6: Display actual authenticated UID
+                diagUid.textContent = user.uid;
+                diagUid.className = "font-mono text-emerald-400 font-medium break-all sm:text-right";
+
+                // Step 7: Read Firestore document at "admins/{currentUser.uid}"
+                const adminDocRef = doc(db, "admins", user.uid);
+                const adminDocSnap = await getDoc(adminDocRef);
+
+                // Step 8: Show whether document exists
+                if (adminDocSnap.exists()) {
+                    diagDocExists.textContent = "Yes (Found)";
+                    diagDocExists.className = "font-mono text-emerald-400 font-medium";
+
+                    const data = adminDocSnap.data();
+                    const role = data.role;
+                    const roleType = typeof role;
+
+                    // Step 9: Display actual "role" value and data type
+                    diagRoleValue.textContent = role !== undefined ? JSON.stringify(role) : "undefined (field missing)";
+                    diagRoleValue.className = "font-mono text-slate-200";
+
+                    diagRoleType.textContent = roleType;
+                    diagRoleType.className = "font-mono text-slate-200";
+
+                    // Step 12: Show clear success message when role is exactly "admin"
+                    if (role === "admin") {
+                        showStatus(
+                            "success",
+                            "Admin Access Verified Successfully!",
+                            "Your account is correctly authenticated and authorized with role: 'admin'."
+                        );
+                    } else {
+                        // Step 10 / 11: Admin role mismatch
+                        showStatus(
+                            "warning",
+                            "Admin Role Mismatch",
+                            `Document exists, but 'role' field value is '${role}' (type: ${roleType}). Expected exact string 'admin'.`
+                        );
+                        diagRoleValue.className = "font-mono text-amber-400 font-bold";
+                    }
+
+                } else {
+                    // Step 10: Admin document missing
+                    diagDocExists.textContent = "No (Document Missing)";
+                    diagDocExists.className = "font-mono text-red-400 font-medium";
+                    diagRoleValue.textContent = "N/A";
+                    diagRoleType.textContent = "N/A";
+
+                    showStatus(
+                        "error",
+                        "Admin Document Missing",
+                        `Authenticated successfully as UID: ${user.uid}, but no corresponding document exists in the 'admins' Firestore collection.`
+                    );
+                }
+
+            } catch (error) {
+                console.error("Diagnostic Error caught:", error);
+                
+                diagAuth.textContent = "Failed";
+                diagAuth.className = "font-mono text-red-400 font-medium";
+                diagUid.textContent = auth.currentUser ? auth.currentUser.uid : "None";
+
+                let errorTitle = "Diagnostic Error";
+                let errorDescription = error.message;
+
+                // Step 10 & 11: Distinguish errors clearly with specific codes & messages
+                if (error.code === 'auth/invalid-email' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    errorTitle = "Invalid Email or Password";
+                    errorDescription = "The credentials provided do not match any active Firebase Authentication record.";
+                } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
+                    errorTitle = "Authentication Configuration Error";
+                    errorDescription = "Email/Password sign-in provider may not be enabled in the Firebase Console.";
+                } else if (error.code === 'permission-denied') {
+                    errorTitle = "Firestore Permission Denied";
+                    errorDescription = "Security rules prevented reading the 'admins' collection for this authenticated user.";
+                } else if (error.code === 'unavailable' || error.code === 'network-request-failed') {
+                    errorTitle = "Network or SDK Error";
+                    errorDescription = "Unable to connect to Firebase services. Check your internet connection.";
+                } else {
+                    errorTitle = "Firebase Operation Error (" + error.code + ")";
+                }
+
+                showStatus("error", errorTitle, errorDescription);
+
+                // Show raw error code & message as requested in Requirement 11
+                errorBox.classList.remove('hidden');
+                errorText.textContent = `Error Code: ${error.code || 'unknown'}\nMessage: ${error.message}`;
+
+            } finally {
+                // Reset loading state
+                submitBtn.disabled = false;
+                btnText.textContent = "Login karke Admin check karein";
+                btnSpinner.classList.add('hidden');
+                resultsContainer.classList.remove('hidden');
+            }
+        });
+
+        function showStatus(type, title, desc) {
+            statusBanner.className = "p-4 rounded-xl border flex items-start space-x-3 transition-all ";
+            if (type === "success") {
+                statusBanner.className += "bg-emerald-950/40 border-emerald-900/60 text-emerald-200";
+                statusIcon.innerHTML = `<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+            } else if (type === "warning") {
+                statusBanner.className += "bg-amber-950/40 border-amber-900/60 text-amber-200";
+                statusIcon.innerHTML = `<svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`;
+            } else {
+                statusBanner.className += "bg-red-950/40 border-red-900/60 text-red-200";
+                statusIcon.innerHTML = `<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+            }
+            statusTitle.textContent = title;
+            statusDesc.textContent = desc;
+        }
+    </script>
+<
