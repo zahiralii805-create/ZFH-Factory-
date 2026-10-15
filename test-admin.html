@@ -31,7 +31,7 @@
             </div>
             <div class="text-right">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                    v2.0 Diagnostic
+                    v2.1 Diagnostic
                 </span>
             </div>
         </div>
@@ -50,7 +50,7 @@
             </h2>
             <div class="text-xs space-y-1.5 text-slate-400">
                 <p><span class="text-slate-500 font-mono">Expected Admin UID:</span> <code class="text-orange-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded select-all">cHookFowc4d5XRL723TkT02edmO2</code></p>
-                <p><span class="text-slate-500 font-mono">Firestore Path:</span> <code class="text-slate-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded">admins/{uid}</code> (Field: <code class="text-slate-300 font-mono">role</code> == <code class="text-emerald-400 font-mono">"admin"</code>)</p>
+                <p><span class="text-slate-500 font-mono">Firestore Path:</span> <code class="text-slate-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded">Admins/{uid}</code> (Field: <code class="text-slate-300 font-mono">Role</code> == <code class="text-emerald-400 font-mono">"admin"</code>)</p>
             </div>
         </div>
 
@@ -116,7 +116,7 @@
                     </div>
                     <!-- Firestore Doc Check -->
                     <div class="py-3 flex justify-between items-center">
-                        <span class="text-slate-400">Firestore Document (<code class="text-slate-300">admins/{uid}</code>)</span>
+                        <span class="text-slate-400">Firestore Document (<code class="text-slate-300">Admins/{uid}</code>)</span>
                         <span id="diagDocExists" class="font-mono text-slate-500">Pending</span>
                     </div>
                     <!-- Role Field Check -->
@@ -158,7 +158,6 @@
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-        // Provided Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBj_HoFFQJwmX6ChAp9YiuMOpUduZD0Yzc",
             authDomain: "zfh-factory.firebaseapp.com",
@@ -169,14 +168,13 @@
             measurementId: "G-21KK6BV0PD"
         };
 
-        // Initialize Firebase
         let app, auth, db;
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
         } catch (initErr) {
-            console.error("Firebase SDK Initialization Error:", initErr);
+            console.error("Firebase Initialization Error:", initErr);
         }
 
         const loginForm = document.getElementById('loginForm');
@@ -204,11 +202,10 @@
             e.preventDefault();
 
             if (!auth || !db) {
-                alert("Firebase failed to initialize. Please check network connection.");
+                alert("Firebase failed to initialize.");
                 return;
             }
 
-            // UI Loading state
             submitBtn.disabled = true;
             btnText.textContent = "Authenticating...";
             btnSpinner.classList.remove('hidden');
@@ -219,38 +216,35 @@
             const password = passwordInput.value;
 
             try {
-                // Step 5: Sign in using Firebase Authentication
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
                 diagAuth.textContent = "Authenticated Successfully";
                 diagAuth.className = "font-mono text-emerald-400 font-medium";
-
-                // Step 6: Display actual authenticated UID
                 diagUid.textContent = user.uid;
                 diagUid.className = "font-mono text-emerald-400 font-medium break-all sm:text-right";
 
-                // Step 7: Read Firestore document at "admins/{currentUser.uid}"
-                const adminDocRef = doc(db, "admins", user.uid);
-                const adminDocSnap = await getDoc(adminDocRef);
+                // Check "Admins" collection (Capital 'A' to match Firestore)
+                let adminDocSnap = await getDoc(doc(db, "Admins", user.uid));
+                if (!adminDocSnap.exists()) {
+                    // Fallback try lowercase "admins" just in case
+                    adminDocSnap = await getDoc(doc(db, "admins", user.uid));
+                }
 
-                // Step 8: Show whether document exists
                 if (adminDocSnap.exists()) {
                     diagDocExists.textContent = "Yes (Found)";
                     diagDocExists.className = "font-mono text-emerald-400 font-medium";
 
                     const data = adminDocSnap.data();
-                    const role = data.role;
+                    // Check both lowercase 'role' and uppercase 'Role'
+                    const role = data.role !== undefined ? data.role : data.Role;
                     const roleType = typeof role;
 
-                    // Step 9: Display actual "role" value and data type
                     diagRoleValue.textContent = role !== undefined ? JSON.stringify(role) : "undefined (field missing)";
                     diagRoleValue.className = "font-mono text-slate-200";
-
                     diagRoleType.textContent = roleType;
                     diagRoleType.className = "font-mono text-slate-200";
 
-                    // Step 12: Show clear success message when role is exactly "admin"
                     if (role === "admin") {
                         showStatus(
                             "success",
@@ -258,17 +252,15 @@
                             "Your account is correctly authenticated and authorized with role: 'admin'."
                         );
                     } else {
-                        // Step 10 / 11: Admin role mismatch
                         showStatus(
                             "warning",
                             "Admin Role Mismatch",
-                            `Document exists, but 'role' field value is '${role}' (type: ${roleType}). Expected exact string 'admin'.`
+                            `Document exists, but role value is '${role}' (type: ${roleType}). Expected exact string 'admin'.`
                         );
                         diagRoleValue.className = "font-mono text-amber-400 font-bold";
                     }
 
                 } else {
-                    // Step 10: Admin document missing
                     diagDocExists.textContent = "No (Document Missing)";
                     diagDocExists.className = "font-mono text-red-400 font-medium";
                     diagRoleValue.textContent = "N/A";
@@ -277,13 +269,12 @@
                     showStatus(
                         "error",
                         "Admin Document Missing",
-                        `Authenticated successfully as UID: ${user.uid}, but no corresponding document exists in the 'admins' Firestore collection.`
+                        `Authenticated successfully as UID: ${user.uid}, but no corresponding document exists in 'Admins' or 'admins'.`
                     );
                 }
 
             } catch (error) {
-                console.error("Diagnostic Error caught:", error);
-                
+                console.error("Diagnostic Error:", error);
                 diagAuth.textContent = "Failed";
                 diagAuth.className = "font-mono text-red-400 font-medium";
                 diagUid.textContent = auth.currentUser ? auth.currentUser.uid : "None";
@@ -291,31 +282,24 @@
                 let errorTitle = "Diagnostic Error";
                 let errorDescription = error.message;
 
-                // Step 10 & 11: Distinguish errors clearly with specific codes & messages
                 if (error.code === 'auth/invalid-email' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                     errorTitle = "Invalid Email or Password";
                     errorDescription = "The credentials provided do not match any active Firebase Authentication record.";
-                } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
-                    errorTitle = "Authentication Configuration Error";
-                    errorDescription = "Email/Password sign-in provider may not be enabled in the Firebase Console.";
                 } else if (error.code === 'permission-denied') {
                     errorTitle = "Firestore Permission Denied";
-                    errorDescription = "Security rules prevented reading the 'admins' collection for this authenticated user.";
+                    errorDescription = "Security rules prevented reading the collection for this authenticated user.";
                 } else if (error.code === 'unavailable' || error.code === 'network-request-failed') {
                     errorTitle = "Network or SDK Error";
-                    errorDescription = "Unable to connect to Firebase services. Check your internet connection.";
+                    errorDescription = "Unable to connect to Firebase services.";
                 } else {
                     errorTitle = "Firebase Operation Error (" + error.code + ")";
                 }
 
                 showStatus("error", errorTitle, errorDescription);
-
-                // Show raw error code & message as requested in Requirement 11
                 errorBox.classList.remove('hidden');
                 errorText.textContent = `Error Code: ${error.code || 'unknown'}\nMessage: ${error.message}`;
 
             } finally {
-                // Reset loading state
                 submitBtn.disabled = false;
                 btnText.textContent = "Login karke Admin check karein";
                 btnSpinner.classList.add('hidden');
@@ -339,4 +323,5 @@
             statusDesc.textContent = desc;
         }
     </script>
-<
+</body>
+</html>
